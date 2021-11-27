@@ -136,7 +136,7 @@ class UserController extends Controller
     }
 
     public function ListUserInformers($limit = null)
-    {
+    { 
         $limit ? $limit = $limit : $limit = 10;
 
         $users = User::where('id_rol',2)->withCount('complaint')->paginate($limit);

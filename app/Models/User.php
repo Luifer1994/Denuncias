@@ -24,6 +24,7 @@ class User extends Authenticatable
         'id_rol',
         'id_profession',
         'remember_token',
+        'email_verified_at'
     ];
 
     protected $casts = [

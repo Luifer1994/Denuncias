@@ -19,5 +19,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/complaints-list{limit?}', [ComplaintController::class, 'index']);
     Route::apiResource('/complaints', ComplaintController::class);
     //Usuarios
-    Route::get('list-users-informers', [UserController::class,'ListUserInformers']);
+    Route::get('list-users-informers{limit?}', [UserController::class,'ListUserInformers']);
 });
