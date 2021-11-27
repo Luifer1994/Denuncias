@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [UserController::class, 'login']);
 
-Route::post('/register-user-whistleblower', [UserController::class, 'registerUserWhistleblower']);
+Route::post('/register-user-informer', [UserController::class, 'registerUserInformer']);
 
 Route::group(['middleware' => 'auth:api'], function () {
     //Roles
@@ -18,4 +18,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Denuncias
     Route::get('/complaints-list{limit?}', [ComplaintController::class, 'index']);
     Route::apiResource('/complaints', ComplaintController::class);
+    //Usuarios
+    Route::get('list-users-informers', [UserController::class,'ListUserInformers']);
 });

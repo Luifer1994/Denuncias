@@ -39,4 +39,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Profession::class, 'id_profession', 'id');
     }
+
+    public function complaint()
+    {
+        return $this->hasMany(Complaint::class, 'id_user');
+    }
 }

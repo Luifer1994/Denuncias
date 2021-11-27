@@ -29,7 +29,7 @@ class UserController extends Controller
             $token = $user->createToken('Laravel')->accessToken;
             return response()->json([
                 'res' => true,
-                'data' => ["user" => $user, "token" => $token],
+                'data' => ["user" => $user, "token" => $token, "message"=> "Bienvenido al sistema"],
             ], 200);
         } else {
             return response()->json([
@@ -39,7 +39,7 @@ class UserController extends Controller
         }
     }
 
-    public function registerUserWhistleblower(Request $request)
+    public function registerUserInformer(Request $request)
     {
         //Regla de validación
         $rules = [
@@ -133,5 +133,18 @@ class UserController extends Controller
             'res' => true,
             'message'=> 'Hasta pronto',
         ],200);
+    }
+
+    public function ListUserInformers($limit = null)
+    {
+        $limit ? $limit = $limit : $limit = 10;
+
+        $users = User::where('id_rol',2)->withCount('complaint')->paginate($limit);
+
+        return response()->json([
+            'res' => true,
+            'message' => 'ok',
+            'data' => $users,
+        ], 200);
     }
 }

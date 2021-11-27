@@ -25,4 +25,9 @@ class Complaint extends Model
     {
         return $this->hasMany(Media::class, 'id_complaint');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
 }
