@@ -42,6 +42,14 @@ class DatabaseSeeder extends Seeder
                 "state" => 1
             ]);
         }
+
+        $complaintState = ["Enviada", "En proceso", "En revisión", "Cerrada"];
+        foreach ($complaintState as $value) {
+            DB::table('state_complaints')->insert([
+                "name" => $value,
+                "state" => 1
+            ]);
+        }
         User::factory(1)->create();
         Infringement::factory(1)->create();
         ComplaintTypeInfringement::factory(1)->create();

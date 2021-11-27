@@ -8,4 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Complaint extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'latitude',
+        'longitude',
+        'address',
+        'name_offender',
+        'description',
+        'id_complaint_type',
+        'id_user',
+        'id_state',
+        'id_user_asigne'
+    ];
+
+    public function media()
+    {
+        return $this->hasMany(Media::class, 'id_complaint');
+    }
 }
