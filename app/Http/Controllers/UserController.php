@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -29,7 +30,7 @@ class UserController extends Controller
             $token = $user->createToken('Laravel')->accessToken;
             return response()->json([
                 'res' => true,
-                'data' => ["user" => $user, "token" => $token, "message"=> "Bienvenido al sistema"],
+                'data' => ["user" => $user, "token" => $token, "message" => "Bienvenido al sistema"],
             ], 200);
         } else {
             return response()->json([
@@ -126,25 +127,35 @@ class UserController extends Controller
         //Obtenemos usuario logeado
         $user = Auth::user();
         //Busca todos los token del usuario en la base de datos y los eliminamos;
-        $user->tokens->each(function($token){
-           $token->delete();
+        $user->tokens->each(function ($token) {
+            $token->delete();
         });
         return response()->json([
             'res' => true,
-            'message'=> 'Hasta pronto',
-        ],200);
+            'message' => 'Hasta pronto',
+        ], 200);
     }
 
-    public function ListUserInformers($limit = null)
-    { 
-        $limit ? $limit = $limit : $limit = 10;
+    public function ListUserInformers(Request $request)
+    {
+        //return $request;
+        $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
-        $users = User::where('id_rol',2)->withCount('complaint')->paginate($limit);
+        $users = User::where('id', 'like', '%' . $request["search"] . '%')
+            ->orwhere('name', 'like', '%' . $request["search"] . '%')
+            ->orwhere('email', 'like', '%' . $request["search"] . '%')
+            ->withCount('complaint')->orderBy('created_at', 'desc')->paginate($limit);
+
 
         return response()->json([
             'res' => true,
             'message' => 'ok',
             'data' => $users,
         ], 200);
+    }
+
+    public function userAuth()
+    {
+        return Auth::user();
     }
 }

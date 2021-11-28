@@ -18,11 +18,11 @@ class User extends Authenticatable
         'email',
         'phone',
         'password',
+        'id_rol',
+        'id_profession'
     ];
     protected $hidden = [
         'password',
-        'id_rol',
-        'id_profession',
         'remember_token',
         'email_verified_at'
     ];
