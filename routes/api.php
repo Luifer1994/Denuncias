@@ -16,7 +16,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/register-user-professional', [UserController::class, 'registerUserProfessional']);
     Route::get('/logout', [UserController::class, 'logout']);
     //Denuncias
-    Route::get('/complaints-list/{limit?}', [ComplaintController::class, 'index']);
+    Route::get('/complaints-list{search?}{state?}{limit?}{page?}', [ComplaintController::class, 'index']);
     Route::apiResource('/complaints', ComplaintController::class);
     //Usuarios
     Route::get('list-users-informers{search?}{limit?}{page?}', [UserController::class,'ListUserInformers']);

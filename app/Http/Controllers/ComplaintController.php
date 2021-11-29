@@ -16,24 +16,28 @@ class ComplaintController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($limit = null)
+    public function index(Request $request)
     {
-        $limit ? $limit = $limit : $limit = 10;
+        /* return $request["state"]; */
+        $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
         $complaints = Complaint::select(
-            'complaints.id',
-            'complaint_types.name as type_complaint',
-            'users.name as informer',
-            'state_complaints.name as state',
-            'complaints.latitude',
-            'complaints.longitude',
-            'complaints.name_offender',
-            'complaints.description',
-            'complaints.created_at'
-        )
+                'complaints.id',
+                'complaint_types.name as type_complaint',
+                'users.name as informer',
+                'state_complaints.name as state',
+                'complaints.latitude',
+                'complaints.longitude',
+                'complaints.name_offender',
+                'complaints.description',
+                'complaints.created_at'
+            )
             ->join('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
+            ->where('complaints.id', 'like', '%' . $request["search"] . '%')
+            ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
+            ->with('media')
             ->OrderBy('id', 'desc')->paginate($limit);
 
         return response()->json([
