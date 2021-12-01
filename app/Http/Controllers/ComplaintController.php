@@ -32,12 +32,11 @@ class ComplaintController extends Controller
                 'complaints.description',
                 'complaints.created_at'
             )
-            ->join('users', 'complaints.id_user', '=', 'users.id')
+            ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
             ->where('complaints.id', 'like', '%' . $request["search"] . '%')
             ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
-            ->with('media')
             ->OrderBy('id', 'desc')->paginate($limit);
 
         return response()->json([
@@ -54,7 +53,13 @@ class ComplaintController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    { 
+        if (Auth::check()) {
+            $user = Auth::user()->id;
+        } else {
+            $user = null;
+        }
+        
         $rules = [
             'latitude' => 'required',
             'longitude' => 'required',
@@ -77,7 +82,7 @@ class ComplaintController extends Controller
             $newComplaint->name_offender        = $request->name_offender;
             $newComplaint->description          = $request->description;
             $newComplaint->id_complaint_type    = $request->id_complaint_type;
-            $newComplaint->id_user              = Auth::user()->id;
+            $newComplaint->id_user              = $user;
             $newComplaint->id_state             = 1;
 
             if ($newComplaint->save()) {
@@ -134,10 +139,12 @@ class ComplaintController extends Controller
             'complaints.description',
             'complaints.created_at'
         )
-            ->join('users', 'complaints.id_user', '=', 'users.id')
+            ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
             ->where('complaints.id', $id)
+            ->with('media')
+            ->with('ResponseComplaint')
             ->first();
 
         if ($complaint) {

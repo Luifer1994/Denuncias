@@ -15,7 +15,7 @@ class CreateResponseComplaintsTable extends Migration
     {
         Schema::create('response_complaints', function (Blueprint $table) {
             $table->id();
-            $table->string('description');
+            $table->string('description')->nullable();
             $table->foreignId('id_complaint')->constrained('complaints');
             $table->foreignId('id_state_complaint')->constrained('state_complaints');
             $table->foreignId('id_user')->constrained('users');

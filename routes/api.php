@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [UserController::class, 'login']);
 
 Route::post('/register-user-informer', [UserController::class, 'registerUserInformer']);
+Route::post('/register-complaint', [ComplaintController::class, 'store']);
 
 Route::group(['middleware' => 'auth:api'], function () {
     //Roles

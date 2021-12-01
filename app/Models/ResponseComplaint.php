@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ResponseComplaint extends Model
 {
     use HasFactory;
+    public function complaint()
+    {
+        return $this->belongsTo(Complaint::class, 'id_complaint');
+    }
 }
