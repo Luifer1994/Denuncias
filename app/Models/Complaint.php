@@ -10,6 +10,7 @@ class Complaint extends Model
     use HasFactory;
 
     protected $fillable = [
+        'cod',
         'latitude',
         'longitude',
         'address',

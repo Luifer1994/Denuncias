@@ -22,20 +22,21 @@ class ComplaintController extends Controller
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
         $complaints = Complaint::select(
-                'complaints.id',
-                'complaint_types.name as type_complaint',
-                'users.name as informer',
-                'state_complaints.name as state',
-                'complaints.latitude',
-                'complaints.longitude',
-                'complaints.name_offender',
-                'complaints.description',
-                'complaints.created_at'
-            )
+            'complaints.id',
+            'complaints.cod',
+            'complaint_types.name as type_complaint',
+            'users.name as informer',
+            'state_complaints.name as state',
+            'complaints.latitude',
+            'complaints.longitude',
+            'complaints.name_offender',
+            'complaints.description',
+            'complaints.created_at'
+        )
             ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
-            ->where('complaints.id', 'like', '%' . $request["search"] . '%')
+            ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
             ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
             ->OrderBy('id', 'desc')->paginate($limit);
 
@@ -53,13 +54,13 @@ class ComplaintController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { 
+    {
         if (Auth::check()) {
             $user = Auth::user()->id;
         } else {
             $user = null;
         }
-        
+
         $rules = [
             'latitude' => 'required',
             'longitude' => 'required',
@@ -86,22 +87,30 @@ class ComplaintController extends Controller
             $newComplaint->id_state             = 1;
 
             if ($newComplaint->save()) {
-                if ($request->media && count($request->media) > 0) {
-                    foreach ($request->media as $value) {
-                        $newMedia = new Media();
-                        $newMedia->type = $value["type"];
-                        $newMedia->url  = $value["url"];
-                        $newMedia->id_complaint = $newComplaint->id;
+                $lasComplaint = Complaint::latest('id')->first();
+                $lasComplaint->cod = "APP-" . $lasComplaint->id;
+                if ($lasComplaint->update()) {
+                    if ($request->media && count($request->media) > 0) {
+                        foreach ($request->media as $value) {
+                            $newMedia = new Media();
+                            $newMedia->type = $value["type"];
+                            $newMedia->url  = $value["url"];
+                            $newMedia->id_complaint = $newComplaint->id;
 
-                        if (!$newMedia->save()) {
-                            return response()->json([
-                                "res" => false,
-                                "message" => 'Error al guardar las evidencias'
-                            ], 400);
+                            if (!$newMedia->save()) {
+                                return response()->json([
+                                    "res" => false,
+                                    "message" => 'Error al guardar las evidencias'
+                                ], 400);
+                            }
                         }
                     }
+                } else {
+                    return response()->json([
+                        "res" => false,
+                        "message" => 'Error al guardar el registro'
+                    ], 400);
                 }
-
                 return response()->json([
                     "res" => true,
                     "message" => 'Denuncia creada con exito'
@@ -130,6 +139,7 @@ class ComplaintController extends Controller
     {
         $complaint = Complaint::select(
             'complaints.id',
+            'complaints.cod',
             'complaint_types.name as type_complaint',
             'users.name as informer',
             'state_complaints.name as state',
