@@ -18,8 +18,7 @@ class CreateResponseComplaintsTable extends Migration
             $table->string('description')->nullable();
             $table->foreignId('id_complaint')->constrained('complaints');
             $table->foreignId('id_state_complaint')->constrained('state_complaints');
-            $table->foreignId('id_user')->constrained('users');
-            $table->integer('id_media')->nullable();
+            $table->integer('id_user')->nullable();
             $table->timestamps();
         });
     }

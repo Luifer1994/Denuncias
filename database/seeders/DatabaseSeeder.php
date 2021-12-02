@@ -21,14 +21,14 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
-        $roles = ["Admin", "Denunciante", "Abogado"];
+        $roles = ["Admin", "Denunciante", "Funcionario"];
         foreach ($roles as $rol) {
             DB::table('rols')->insert([
                 "name" => $rol,
                 "state" => 1
             ]);
         }
-        $professions = ["Admin","Denunciante", "Técnico", "Abogado"];
+        $professions = ["Admin","Denunciante", "Funcionario"];
         foreach ($professions as $value) {
             DB::table('professions')->insert([
                 "name" => $value,
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $complaintState = ["Enviada", "En proceso", "En revisión", "Cerrada"];
+        $complaintState = ["INICIADA", "EN PROCESO", "FINALIZADA"];
         foreach ($complaintState as $value) {
             DB::table('state_complaints')->insert([
                 "name" => $value,

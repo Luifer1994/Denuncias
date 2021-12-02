@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Complaint;
 use App\Models\ComplaintType;
 use App\Models\Media;
+use App\Models\ResponseComplaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -104,6 +105,12 @@ class ComplaintController extends Controller
                                 ], 400);
                             }
                         }
+                        $newResponse = new ResponseComplaint();
+                        $newResponse->description           = $lasComplaint->description;
+                        $newResponse->id_complaint          = $lasComplaint->id;
+                        $newResponse->id_state_complaint    = $lasComplaint->id_state;
+                        $newResponse->id_user               = $lasComplaint->id_user;
+                        $newResponse->save();
                     }
                 } else {
                     return response()->json([

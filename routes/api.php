@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -22,4 +23,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Usuarios
     Route::get('list-users-informers{search?}{limit?}{page?}', [UserController::class,'ListUserInformers']);
     Route::get('/user-auth', [UserController::class, 'userAuth']);
+    //Respuestas
+    Route::post('/response-add', [ResponseController::class, 'store']);
 });
