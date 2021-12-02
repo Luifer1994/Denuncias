@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class MediaResponse extends Model
 {
     use HasFactory;
+
+    public function response()
+    {
+        return $this->belongsTo(ResponseComplaint::class, 'id_response');
+    }
 }

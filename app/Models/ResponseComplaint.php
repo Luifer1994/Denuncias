@@ -12,4 +12,9 @@ class ResponseComplaint extends Model
     {
         return $this->belongsTo(Complaint::class, 'id_complaint');
     }
+
+    public function MediaResponse()
+    {
+        return $this->hasMany(MediaResponse::class, 'id_response');
+    }
 }

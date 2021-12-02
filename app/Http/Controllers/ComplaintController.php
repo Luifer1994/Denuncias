@@ -162,10 +162,48 @@ class ComplaintController extends Controller
             ->where('complaints.id', $id)
             ->with('media')
             ->with('ResponseComplaint')
+            //->with('MediaResponse')
             ->first();
 
         if ($complaint) {
             $complaint["media"] = $complaint->media;
+            return response()->json([
+                'res' => true,
+                'message' => 'ok',
+                'data' => $complaint,
+            ], 200);
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'La denuncia no existe',
+            ], 400);
+        }
+    }
+    public function filterByCode(Request $request)
+    {
+        //return $request["cod"];
+        $complaint = Complaint::select(
+            'complaints.id',
+            'complaints.cod',
+            'complaint_types.name as type_complaint',
+            'users.name as informer',
+            'state_complaints.name as state',
+            'complaints.latitude',
+            'complaints.longitude',
+            'complaints.name_offender',
+            'complaints.description',
+            'complaints.created_at'
+        )
+            ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+            ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
+            ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
+            ->where('complaints.cod', $request["cod"])
+            ->with('media')
+            ->with('ResponseComplaint')
+            ->first();
+       
+
+        if ($complaint) {
             return response()->json([
                 'res' => true,
                 'message' => 'ok',
