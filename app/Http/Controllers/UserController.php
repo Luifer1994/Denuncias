@@ -26,7 +26,6 @@ class UserController extends Controller
 
         if ($user && Hash::check($request->password, $user->password)) {
             $user["rol"]        = $user->rol;
-            $user["profession"] = $user->profession;
             $token = $user->createToken('Laravel')->accessToken;
             return response()->json([
                 'res' => true,
@@ -44,9 +43,11 @@ class UserController extends Controller
     {
         //Regla de validación
         $rules = [
-            'name'      =>  'required|string',
-            'email'     =>  'required|email|unique:users,email',
-            'password'  =>  'required|min:8'
+            'type_document' => 'required|integer',
+            'document'      => 'required|integer',
+            'name'          =>  'required|string',
+            'email'         =>  'required|email|unique:users,email',
+            'password'      =>  'required|min:8'
         ];
         //Validamos
         $validator = Validator::make($request->all(), $rules);
@@ -56,57 +57,14 @@ class UserController extends Controller
         }
 
         $newUser = new User();
+        $newUser->id_type_document  = $request["type_document"];
+        $newUser->document          = $request["document"];
         $newUser->name          = $request["name"];
         $newUser->email         = $request["email"];
         $newUser->phone         = $request["phone"];
         $newUser->password      = Hash::make($request["password"]);
         $newUser->id_rol        = 2; //Denunciante
         $newUser->id_profession = 2; //denunciante
-
-        if ($newUser->save()) {
-            return response()->json([
-                "res" => true,
-                "data" => $newUser,
-                'message' => 'Registro exitoso',
-            ], 200);
-        } else {
-            return response()->json([
-                "res" => false,
-                'message' => 'Error al guardar el registro',
-            ], 400);
-        }
-    }
-
-    public function registerUserProfessional(Request $request)
-    {
-        if (Auth::user()->rol->id !== 1) {
-            return response()->json([
-                "res" => false,
-                'message' => 'No tienes permisos',
-            ], 401);
-        }
-        //Regla de validación
-        $rules = [
-            'name'          =>  'required|string',
-            'email'         =>  'required|email|unique:users,email',
-            'password'      =>  'required|min:8',
-            'id_rol'        =>  'required|integer',
-            'id_profession' =>  'required|integer'
-        ];
-        //Validamos
-        $validator = Validator::make($request->all(), $rules);
-        //Retorna si falla la validación
-        if ($validator->fails()) {
-            return $validator->errors();
-        }
-
-        $newUser = new User();
-        $newUser->name          = $request["name"];
-        $newUser->email         = $request["email"];
-        $newUser->phone         = $request["phone"];
-        $newUser->password      = Hash::make($request["password"]);
-        $newUser->id_rol        = $request["id_rol"];
-        $newUser->id_profession = $request["id_profession"];
 
         if ($newUser->save()) {
             return response()->json([
@@ -141,9 +99,8 @@ class UserController extends Controller
         //return $request;
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
-        $users = User::where('id', 'like', '%' . $request["search"] . '%')
-            ->orwhere('name', 'like', '%' . $request["search"] . '%')
-            ->orwhere('email', 'like', '%' . $request["search"] . '%')
+        $users = User::where('id_rol', 2)
+            ->where('id', 'like', '%' . $request["search"] . '%')
             ->withCount('complaint')->orderBy('created_at', 'desc')->paginate($limit);
 
 
@@ -152,6 +109,62 @@ class UserController extends Controller
             'message' => 'ok',
             'data' => $users,
         ], 200);
+    }
+
+    public function RegisterOfficial(Request $request)
+    {
+        if (Auth::user()->rol->id !== 1) {
+            return response()->json([
+                "res" => false,
+                'message' => 'No tienes permisos',
+            ], 401);
+        }
+        //Regla de validación
+        $rules = [
+            'type_document' => 'required|integer',
+            'document'      => 'required|integer',
+            'rol'           => 'required|integer',
+            'name'          => 'required|string',
+            'email'         => 'required|email|unique:users,email',
+            'phone'         => 'required'
+        ];
+        //Validamos
+        $validator = Validator::make($request->all(), $rules);
+        //Retorna si falla la validación
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 402);
+        }
+        $newUser = new User();
+        $newUser->id_type_document  = $request->type_document;
+        $newUser->document          = $request->document;
+        $newUser->name              = $request->name;
+        $newUser->email             = $request->email;
+        $newUser->phone             = $request->phone;
+        $newUser->password          = Hash::make($request->document);
+        $newUser->id_rol            = $request->rol;
+        $newUser->id_profession     = $request->profession;
+        if ($newUser->save()) {
+            return response()->json([
+                "res" => true,
+                "data" => $newUser,
+                'message' => 'Registro exitoso',
+            ], 200);
+        } else {
+            return response()->json([
+                "res" => false,
+                'message' => 'Error al guardar el registro',
+            ], 400);
+        }
+    }
+
+    public function ListOfficial()
+    {
+        $users = User::select('id','name')->where('id_rol',3)->get();
+
+        return response()->json([
+        'res' => true,
+        "data" => $users
+        ],200);
     }
 
     public function userAuth()

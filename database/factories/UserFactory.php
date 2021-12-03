@@ -15,6 +15,8 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
+            'id_type_document' => 1,
+            'document' => 12345678,
             'name' => 'admin',
             'email' => 'admin@admin.com',
             'phone' => '+57 3117952897',

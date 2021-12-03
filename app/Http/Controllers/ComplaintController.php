@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Complaint;
 use App\Models\ComplaintType;
 use App\Models\Media;
+use App\Models\MediaResponse;
 use App\Models\ResponseComplaint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,14 +13,9 @@ use Illuminate\Support\Facades\Validator;
 
 class ComplaintController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index(Request $request)
     {
-        /* return $request["state"]; */
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
         $complaints = Complaint::select(
@@ -48,12 +44,6 @@ class ComplaintController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         if (Auth::check()) {
@@ -73,7 +63,7 @@ class ComplaintController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return $validator->errors();
+            return response()->json($validator->errors(), 402);
         }
         if (ComplaintType::where('id', $request->id_complaint_type)->where('state', 1)->first()) {
 
@@ -120,7 +110,8 @@ class ComplaintController extends Controller
                 }
                 return response()->json([
                     "res" => true,
-                    "message" => 'Denuncia creada con exito'
+                    "data" => ["complaint" => $lasComplaint->cod],
+                    "message" => 'Denuncia creada con éxito'
                 ], 200);
             } else {
                 return response()->json([
@@ -136,12 +127,6 @@ class ComplaintController extends Controller
         };
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $complaint = Complaint::select(
@@ -154,7 +139,8 @@ class ComplaintController extends Controller
             'complaints.longitude',
             'complaints.name_offender',
             'complaints.description',
-            'complaints.created_at'
+            'complaints.created_at',
+            'complaints.address',
         )
             ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
@@ -179,14 +165,15 @@ class ComplaintController extends Controller
             ], 400);
         }
     }
+
     public function filterByCode(Request $request)
     {
-        //return $request["cod"];
         $complaint = Complaint::select(
             'complaints.id',
             'complaints.cod',
             'complaint_types.name as type_complaint',
             'users.name as informer',
+            'complaints.address',
             'state_complaints.name as state',
             'complaints.latitude',
             'complaints.longitude',
@@ -201,7 +188,7 @@ class ComplaintController extends Controller
             ->with('media')
             ->with('ResponseComplaint')
             ->first();
-       
+
 
         if ($complaint) {
             return response()->json([
@@ -217,24 +204,41 @@ class ComplaintController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        //
+        $complaint = Complaint::find($id);
+        if ($complaint && $complaint->id_state + 1 <= 3) {
+            $complaint->id_user_asigne   = $request->user_asigne;
+            $complaint->id_state         = $complaint->id_state + 1;
+            if ($complaint->update()) {
+                $newResponse = new ResponseComplaint();
+                $newResponse->description        = $request->description;
+                $newResponse->id_complaint       = $complaint->id;
+                $newResponse->id_state_complaint = $complaint->id_state;
+                $newResponse->id_user            = $request->user_asigne;
+                if ($newResponse->save() && $request->media_response) {
+                    foreach ($request->media_response as $value) {
+
+                        $newMediaResponse       = new MediaResponse;
+                        $newMediaResponse->url  = $value["url"];
+                        $newMediaResponse->type = $value["type"];
+                        $newMediaResponse->id_response = $newResponse->id;
+                        $newMediaResponse->save();
+                    }
+                }
+                return response()->json([
+                    'res' => true,
+                    'message' => 'Registro exitoso'
+                ]);
+            }
+        } else {
+            return response()->json([
+                "res" => false,
+                'message' => 'Esta denuncia no existe o ya fue cerrada'
+            ], 400);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         //

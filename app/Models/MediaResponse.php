@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class MediaResponse extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'type',
+        'url',
+        'id_response'
+    ];
 
     public function response()
     {

@@ -28,14 +28,14 @@ class DatabaseSeeder extends Seeder
                 "state" => 1
             ]);
         }
-        $professions = ["Admin","Denunciante", "Funcionario"];
+        $professions = ["Admin", "Denunciante", "Funcionario"];
         foreach ($professions as $value) {
             DB::table('professions')->insert([
                 "name" => $value,
                 "state" => 1
             ]);
         }
-        $complaintType = ["Tala de arboles", "Aguas residuales", "Extracción de arena"];
+        $complaintType = ["Tala de árboles", "Aguas residuales", "Extracción de arena", "Descapote", "Ocupación de borde costero"];
         foreach ($complaintType as $value) {
             DB::table('complaint_types')->insert([
                 "name" => $value,
@@ -48,6 +48,12 @@ class DatabaseSeeder extends Seeder
             DB::table('state_complaints')->insert([
                 "name" => $value,
                 "state" => 1
+            ]);
+        }
+        $typesDocuments = ["Cédula de ciudadanía", "Cédula de extranjería"];
+        foreach ($typesDocuments as $type) {
+            DB::table('type_documents')->insert([
+                "name" => $type
             ]);
         }
         User::factory(1)->create();
