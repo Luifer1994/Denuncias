@@ -20,7 +20,7 @@ class CreateComplaintsTable extends Migration
             $table->string('longitude');
             $table->string('address');
             $table->string('name_offender')->nullable();
-            $table->string('description');
+            $table->longText('description');
             $table->foreignId('id_complaint_type')->constrained('complaint_types');
             $table->integer('id_user')->nullable();
             $table->integer('id_user_asigne')->nullable();

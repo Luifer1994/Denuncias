@@ -57,7 +57,7 @@ class ComplaintController extends Controller
             'longitude' => 'required',
             'address' => 'required',
             'name_offender' => 'required|string',
-            'description' => 'required|string|max:255',
+            'description' => 'required|string',
             'id_complaint_type' => 'required|integer'
         ];
         $validator = Validator::make($request->all(), $rules);
@@ -134,6 +134,7 @@ class ComplaintController extends Controller
             'complaints.cod',
             'complaint_types.name as type_complaint',
             'users.name as informer',
+            'users.name as user_asigne',
             'state_complaints.name as state',
             'complaints.latitude',
             'complaints.longitude',
@@ -141,6 +142,7 @@ class ComplaintController extends Controller
             'complaints.description',
             'complaints.created_at',
             'complaints.address',
+            'complaints.id_user_asigne'
         )
             ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
@@ -152,7 +154,6 @@ class ComplaintController extends Controller
             ->first();
 
         if ($complaint) {
-            $complaint["media"] = $complaint->media;
             return response()->json([
                 'res' => true,
                 'message' => 'ok',
@@ -206,6 +207,14 @@ class ComplaintController extends Controller
 
     public function update(Request $request, $id)
     {
+        $rules = [
+            'description' => 'required|string',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 402);
+        }
         $complaint = Complaint::find($id);
         if ($complaint && $complaint->id_state + 1 <= 3) {
             $complaint->id_user_asigne   = $request->user_asigne;

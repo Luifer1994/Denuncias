@@ -15,9 +15,11 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('id_type_people')->constrained('type_people');
             $table->foreignId('id_type_document')->constrained('type_documents');
             $table->integer('document');
             $table->string('name');
+            $table->string('last_name')->nullable();
             $table->string('email')->unique();
             $table->string('phone',15)->nullable();
             $table->timestamp('email_verified_at')->nullable();

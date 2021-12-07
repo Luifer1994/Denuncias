@@ -50,9 +50,16 @@ class DatabaseSeeder extends Seeder
                 "state" => 1
             ]);
         }
-        $typesDocuments = ["Cédula de ciudadanía", "Cédula de extranjería"];
+        $typesDocuments = ["Cédula de ciudadanía", "Cédula de extranjería", "Nit"];
         foreach ($typesDocuments as $type) {
             DB::table('type_documents')->insert([
+                "name" => $type
+            ]);
+        }
+
+        $typesPeople = ["Natural", "Jurídica"];
+        foreach ($typesPeople as $type) {
+            DB::table('type_people')->insert([
                 "name" => $type
             ]);
         }

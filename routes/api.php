@@ -5,6 +5,7 @@ use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\TypeComplaintController;
 use App\Http\Controllers\TypeDocumentController;
+use App\Http\Controllers\TypePeopleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,9 @@ Route::apiResource('/complaint-types', TypeComplaintController::class);
 Route::get('/media-by-response/{id}', [ResponseController::class, 'getMedia']); //Media por respuesta
 //Tipos documentos
 Route::get('list-type-documents', [TypeDocumentController::class, 'index']);
+//Tipos personas
+Route::get('list-type-peoples', [TypePeopleController::class, 'index']);
+
 //Rutas protegidas
 Route::group(['middleware' => 'auth:api'], function () {
     //Roles
@@ -34,6 +38,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/user-auth', [UserController::class, 'userAuth']);
     Route::post('/register-official', [UserController::class, 'RegisterOfficial']);
     Route::get('/list-official', [UserController::class, 'ListOfficial']);
+    Route::get('/filter-user-by-id/{id}', [UserController::class, 'filterById']);
     //Respuestas
     Route::post('/response-add', [ResponseController::class, 'store']);
 });

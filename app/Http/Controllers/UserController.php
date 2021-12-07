@@ -43,28 +43,31 @@ class UserController extends Controller
     {
         //Regla de validación
         $rules = [
+            'type_people'   => 'required|integer',
             'type_document' => 'required|integer',
             'document'      => 'required|integer',
             'name'          =>  'required|string',
             'email'         =>  'required|email|unique:users,email',
-            'password'      =>  'required|min:8'
+            'password'      =>  'required'
         ];
         //Validamos
         $validator = Validator::make($request->all(), $rules);
         //Retorna si falla la validación
         if ($validator->fails()) {
-            return $validator->errors();
+            return response()->json($validator->errors(), 402);
         }
 
         $newUser = new User();
+        $newUser->id_type_people    = $request["type_people"];
         $newUser->id_type_document  = $request["type_document"];
         $newUser->document          = $request["document"];
-        $newUser->name          = $request["name"];
-        $newUser->email         = $request["email"];
-        $newUser->phone         = $request["phone"];
-        $newUser->password      = Hash::make($request["password"]);
-        $newUser->id_rol        = 2; //Denunciante
-        $newUser->id_profession = 2; //denunciante
+        $newUser->name              = $request["name"];
+        $newUser->last_name         = $request["last_name"];
+        $newUser->email             = $request["email"];
+        $newUser->phone             = $request["phone"];
+        $newUser->password          = Hash::make($request["password"]);
+        $newUser->id_rol            = 2; //Denunciante
+        $newUser->id_profession     = 2; //denunciante
 
         if ($newUser->save()) {
             return response()->json([
@@ -121,6 +124,7 @@ class UserController extends Controller
         }
         //Regla de validación
         $rules = [
+            'type_people'   => 'required|integer',
             'type_document' => 'required|integer',
             'document'      => 'required|integer',
             'rol'           => 'required|integer',
@@ -135,9 +139,11 @@ class UserController extends Controller
             return response()->json($validator->errors(), 402);
         }
         $newUser = new User();
+        $newUser->id_type_people  = $request->type_people;
         $newUser->id_type_document  = $request->type_document;
         $newUser->document          = $request->document;
         $newUser->name              = $request->name;
+        $newUser->last_name         = $request->last_name;
         $newUser->email             = $request->email;
         $newUser->phone             = $request->phone;
         $newUser->password          = Hash::make($request->document);
@@ -159,12 +165,22 @@ class UserController extends Controller
 
     public function ListOfficial()
     {
-        $users = User::select('id','name')->where('id_rol',3)->get();
+        $users = User::select('id', 'name')->where('id_rol', 3)->get();
 
         return response()->json([
-        'res' => true,
-        "data" => $users
-        ],200);
+            'res' => true,
+            "data" => $users
+        ], 200);
+    }
+
+    public function filterById($id)
+    {
+        $users = User::select('id', 'name', 'email')->where('id', $id)->first();
+
+        return response()->json([
+            'res' => true,
+            "data" => $users
+        ], 200);
     }
 
     public function userAuth()

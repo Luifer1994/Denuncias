@@ -15,9 +15,11 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
+            'id_type_people' => 1,
             'id_type_document' => 1,
             'document' => 12345678,
-            'name' => 'admin',
+            'name' => 'Admin',
+            'last_name' => 'El Admin',
             'email' => 'admin@admin.com',
             'phone' => '+57 3117952897',
             'id_rol' => 1,
