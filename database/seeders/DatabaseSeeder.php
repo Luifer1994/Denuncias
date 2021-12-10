@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $complaintState = ["INICIADA", "EN PROCESO", "FINALIZADA"];
+        $complaintState = ["INICIADA", "EN PROCESO","INDAGACIÓN", "RETRASADA", "FINALIZADA"];
         foreach ($complaintState as $value) {
             DB::table('state_complaints')->insert([
                 "name" => $value,

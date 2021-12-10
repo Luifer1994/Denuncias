@@ -23,6 +23,7 @@ Route::get('list-type-documents', [TypeDocumentController::class, 'index']);
 //Tipos personas
 Route::get('list-type-peoples', [TypePeopleController::class, 'index']);
 
+
 //Rutas protegidas
 Route::group(['middleware' => 'auth:api'], function () {
     //Roles
@@ -41,4 +42,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/filter-user-by-id/{id}', [UserController::class, 'filterById']);
     //Respuestas
     Route::post('/response-add', [ResponseController::class, 'store']);
+    Route::put('/complaint-update-proccess/{id}', [ComplaintController::class, 'updateProccess']);
 });

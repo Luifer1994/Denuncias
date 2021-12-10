@@ -207,16 +207,8 @@ class ComplaintController extends Controller
 
     public function update(Request $request, $id)
     {
-        $rules = [
-            'description' => 'required|string',
-        ];
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 402);
-        }
         $complaint = Complaint::find($id);
-        if ($complaint && $complaint->id_state + 1 <= 3) {
+        if ($complaint && $complaint->id_state + 1 <= 5) {
             $complaint->id_user_asigne   = $request->user_asigne;
             $complaint->id_state         = $complaint->id_state + 1;
             if ($complaint->update()) {
@@ -247,6 +239,39 @@ class ComplaintController extends Controller
             ], 400);
         }
     }
+
+    public function updateProccess(Request $request, $id)
+    {
+        $complaint = Complaint::where('id_state', 2)->where('id', $id)->first();
+
+
+        if ($complaint) {
+            $newResponse = new ResponseComplaint();
+            $newResponse->description        = $request->description;
+            $newResponse->id_complaint       = $complaint->id;
+            $newResponse->id_state_complaint = $complaint->id_state;
+            $newResponse->id_user            = Auth::user()->id;
+            if ($newResponse->save() && $request->media_response) {
+                foreach ($request->media_response as $value) {
+                    $newMediaResponse       = new MediaResponse;
+                    $newMediaResponse->url  = $value["url"];
+                    $newMediaResponse->type = $value["type"];
+                    $newMediaResponse->id_response = $newResponse->id;
+                    $newMediaResponse->save();
+                }
+            }
+            return response()->json([
+                'res' => true,
+                'message' => 'Registro exitoso'
+            ]);
+        } else {
+            return response()->json([
+                "res" => false,
+                'message' => 'Esta denuncia no existe o ya fue cerrada'
+            ], 400);
+        }
+    }
+
 
     public function destroy($id)
     {
