@@ -114,6 +114,23 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function ListUserOfficial(Request $request)
+    {
+        //return $request;
+        $request["limit"] ? $limit = $request["limit"] : $limit = 10;
+
+        $users = User::where('id_rol', 1)->orwhere('id_rol', 3)
+            ->where('id', 'like', '%' . $request["search"] . '%')
+            ->withCount('complaint')->orderBy('created_at', 'desc')->paginate($limit);
+
+
+        return response()->json([
+            'res' => true,
+            'message' => 'ok',
+            'data' => $users,
+        ], 200);
+    }
+
     public function RegisterOfficial(Request $request)
     {
         if (Auth::user()->rol->id !== 1) {

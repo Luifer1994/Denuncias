@@ -36,6 +36,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::apiResource('/complaints', ComplaintController::class);
     //Usuarios
     Route::get('list-users-informers{search?}{limit?}{page?}', [UserController::class, 'ListUserInformers']);
+    Route::get('list-users-official{search?}{limit?}{page?}', [UserController::class, 'ListUserOfficial']);
     Route::get('/user-auth', [UserController::class, 'userAuth']);
     Route::post('/register-official', [UserController::class, 'RegisterOfficial']);
     Route::get('/list-official', [UserController::class, 'ListOfficial']);
