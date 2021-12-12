@@ -153,6 +153,13 @@ class ComplaintController extends Controller
             //->with('MediaResponse')
             ->first();
 
+        foreach ($complaint->ResponseComplaint as $key => $value) {
+            if ($key > 0) {
+                $value->user =  $value->User;
+                $value->MediaResponse;
+            }
+        }
+        //return $complaint->ResponseComplaint;
         if ($complaint) {
             return response()->json([
                 'res' => true,

@@ -146,6 +146,7 @@ class UserController extends Controller
             'document'      => 'required|integer',
             'rol'           => 'required|integer',
             'name'          => 'required|string',
+            'last_name'     => 'required|string',
             'email'         => 'required|email|unique:users,email',
             'phone'         => 'required'
         ];
@@ -153,7 +154,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), $rules);
         //Retorna si falla la validación
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 402);
+            return response()->json($validator->errors(), 400);
         }
         $newUser = new User();
         $newUser->id_type_people  = $request->type_people;

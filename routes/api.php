@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\ResponseController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\TypeComplaintController;
@@ -22,12 +23,14 @@ Route::get('/media-by-response/{id}', [ResponseController::class, 'getMedia']); 
 Route::get('list-type-documents', [TypeDocumentController::class, 'index']);
 //Tipos personas
 Route::get('list-type-peoples', [TypePeopleController::class, 'index']);
-
+ //Roles
+ Route::get('/rols-active', [RolController::class, 'index']);
+ //Porfesiones
+ Route::get('/professions-active', [ProfessionController::class, 'index']);
 
 //Rutas protegidas
 Route::group(['middleware' => 'auth:api'], function () {
-    //Roles
-    Route::get('/rols-active', [RolController::class, 'index']);
+
     //Usuarios
     Route::post('/register-user-professional', [UserController::class, 'registerUserProfessional']);
     Route::get('/logout', [UserController::class, 'logout']);

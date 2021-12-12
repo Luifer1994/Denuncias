@@ -24,4 +24,9 @@ class ResponseComplaint extends Model
     {
         return $this->hasMany(MediaResponse::class, 'id_response');
     }
+
+    public function User()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
 }
