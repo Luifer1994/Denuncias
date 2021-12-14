@@ -17,6 +17,81 @@ class ComplaintController extends Controller
     public function index(Request $request)
     {
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
+        $id_user = Auth::user()->id;
+
+        if (Auth::user()->id_rol !== 1 && Auth::user()->id_profession == 2) {
+            $complaints = Complaint::select(
+                'complaints.id',
+                'complaints.cod',
+                'complaint_types.name as type_complaint',
+                'users.name as informer',
+                'state_complaints.name as state',
+                'complaints.latitude',
+                'complaints.longitude',
+                'complaints.name_offender',
+                'complaints.description',
+                'complaints.created_at'
+            )
+                ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+                ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
+                ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
+                ->where('id_user_asigne', $id_user)
+                ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
+                ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
+                ->OrderBy('id', 'desc')->paginate($limit);
+        } elseif (Auth::user()->id_rol !== 1 && Auth::user()->id_profession == 3) {
+            $complaints = Complaint::select(
+                'complaints.id',
+                'complaints.cod',
+                'complaint_types.name as type_complaint',
+                'users.name as informer',
+                'state_complaints.name as state',
+                'complaints.latitude',
+                'complaints.longitude',
+                'complaints.name_offender',
+                'complaints.description',
+                'complaints.created_at'
+            )
+                ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+                ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
+                ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
+                ->where('id_user_inquest', $id_user)
+                ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
+                ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
+                ->OrderBy('id', 'desc')->paginate($limit);
+        } else {
+            $complaints = Complaint::select(
+                'complaints.id',
+                'complaints.cod',
+                'complaint_types.name as type_complaint',
+                'users.name as informer',
+                'state_complaints.name as state',
+                'complaints.latitude',
+                'complaints.longitude',
+                'complaints.name_offender',
+                'complaints.description',
+                'complaints.created_at'
+            )
+                ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+                ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
+                ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
+                ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
+                ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
+                ->OrderBy('id', 'desc')->paginate($limit);
+        }
+
+
+
+        return response()->json([
+            'res' => true,
+            'message' => 'ok',
+            'data' => $complaints,
+        ], 200);
+    }
+
+    public function listByUser(Request $request)
+    {
+        $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
         $complaints = Complaint::select(
             'complaints.id',
@@ -33,8 +108,8 @@ class ComplaintController extends Controller
             ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
-            ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
-            ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
+            ->where('complaints.id_user', Auth::user()->id)
+            ->orWhere('complaints.cod', 'like', '%' . $request["search"] . '%')
             ->OrderBy('id', 'desc')->paginate($limit);
 
         return response()->json([
@@ -134,7 +209,11 @@ class ComplaintController extends Controller
             'complaints.cod',
             'complaint_types.name as type_complaint',
             'users.name as informer',
-            'users.name as user_asigne',
+            'users.last_name as last_name_informer',
+            'uf.name as user_asigne',
+            'uf.last_name as last_name_user_asigne',
+            'us.name as name_user_inquest',
+            'us.last_name as last_name_user_inquest',
             'state_complaints.name as state',
             'complaints.latitude',
             'complaints.longitude',
@@ -142,9 +221,12 @@ class ComplaintController extends Controller
             'complaints.description',
             'complaints.created_at',
             'complaints.address',
-            'complaints.id_user_asigne'
+            'complaints.id_user_asigne',
+            'complaints.id_user_inquest'
         )
             ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+            ->leftjoin('users as uf', 'complaints.id_user_asigne', '=', 'uf.id')
+            ->leftjoin('users as us', 'complaints.id_user_inquest', '=', 'us.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
             ->where('complaints.id', $id)
@@ -181,21 +263,38 @@ class ComplaintController extends Controller
             'complaints.cod',
             'complaint_types.name as type_complaint',
             'users.name as informer',
-            'complaints.address',
+            'users.last_name as last_name_informer',
+            'uf.name as user_asigne',
+            'uf.last_name as last_name_user_asigne',
+            'us.name as name_user_inquest',
+            'us.last_name as last_name_user_inquest',
             'state_complaints.name as state',
             'complaints.latitude',
             'complaints.longitude',
             'complaints.name_offender',
             'complaints.description',
-            'complaints.created_at'
+            'complaints.created_at',
+            'complaints.address',
+            'complaints.id_user_asigne',
+            'complaints.id_user_inquest'
         )
             ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+            ->leftjoin('users as uf', 'complaints.id_user_asigne', '=', 'uf.id')
+            ->leftjoin('users as us', 'complaints.id_user_inquest', '=', 'us.id')
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
             ->where('complaints.cod', $request["cod"])
             ->with('media')
             ->with('ResponseComplaint')
+            //->with('MediaResponse')
             ->first();
+
+        foreach ($complaint->ResponseComplaint as $key => $value) {
+            if ($key > 0) {
+                $value->user =  $value->User;
+                $value->MediaResponse;
+            }
+        }
 
 
         if ($complaint) {
@@ -249,7 +348,7 @@ class ComplaintController extends Controller
 
     public function updateProccess(Request $request, $id)
     {
-        $complaint = Complaint::where('id_state', 2)->where('id', $id)->first();
+        $complaint = Complaint::where('id', $id)->first();
 
 
         if ($complaint) {
@@ -279,6 +378,63 @@ class ComplaintController extends Controller
         }
     }
 
+    public function asigneLawyer(Request $request, $id)
+    {
+
+        $complaint = Complaint::find($id);
+        $complaint->id_user_inquest = $request->lawyer;
+        $complaint->id_state        = 3;
+        if ($complaint->update()) {
+            $newResponse = new ResponseComplaint();
+            $newResponse->description        = $request->description;
+            $newResponse->id_complaint       = $complaint->id;
+            $newResponse->id_user            = Auth::user()->id;
+            $newResponse->id_state_complaint = $complaint->id_state;
+            if ($newResponse->save()) {
+                return response()->json([
+                    'res' => true,
+                    'message' => 'Asignación exitosa'
+                ], 200);
+            }
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'Error al asignar el abogado'
+            ], 400);
+        }
+    }
+
+
+    public function closed(Request $request, $id)
+    {
+        $complaint = Complaint::find($id);
+        $complaint->id_state        = 5;
+        if ($complaint->update()) {
+            $newResponse = new ResponseComplaint();
+            $newResponse->description        = $request->description;
+            $newResponse->id_complaint       = $complaint->id;
+            $newResponse->id_user            = Auth::user()->id;
+            $newResponse->id_state_complaint = $complaint->id_state;
+            if ($newResponse->save() && $request->media_response) {
+                foreach ($request->media_response as $value) {
+                    $newMediaResponse       = new MediaResponse;
+                    $newMediaResponse->url  = $value["url"];
+                    $newMediaResponse->type = $value["type"];
+                    $newMediaResponse->id_response = $newResponse->id;
+                    $newMediaResponse->save();
+                }
+                return response()->json([
+                    'res' => true,
+                    'message' => 'Denuncia cerrada con éxito'
+                ], 200);
+            }
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'Error al cerrar la denuncia'
+            ], 400);
+        }
+    }
 
     public function destroy($id)
     {

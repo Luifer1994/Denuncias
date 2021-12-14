@@ -24,6 +24,7 @@ class CreateComplaintsTable extends Migration
             $table->foreignId('id_complaint_type')->constrained('complaint_types');
             $table->integer('id_user')->nullable();
             $table->integer('id_user_asigne')->nullable();
+            $table->integer('id_user_inquest')->nullable();
             $table->foreignId('id_state')->constrained('state_complaints');
             $table->timestamps();
         });

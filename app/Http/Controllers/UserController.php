@@ -103,7 +103,7 @@ class UserController extends Controller
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
         $users = User::where('id_rol', 2)
-            ->where('id', 'like', '%' . $request["search"] . '%')
+            ->where('users.document', 'like', '%' . $request["search"] . '%')
             ->withCount('complaint')->orderBy('created_at', 'desc')->paginate($limit);
 
 
@@ -119,8 +119,11 @@ class UserController extends Controller
         //return $request;
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
-        $users = User::where('id_rol', 1)->orwhere('id_rol', 3)
-            ->where('id', 'like', '%' . $request["search"] . '%')
+        $users = User::select('users.*', 'rols.name as rol', 'professions.name as profession')
+            ->leftjoin('rols', 'users.id_rol', 'rols.id')
+            ->leftjoin('professions', 'users.id_profession', 'professions.id')
+            ->where('users.id_rol', '<>', 2)
+            ->where('users.document', 'like', '%' . $request["search"] . '%')
             ->withCount('complaint')->orderBy('created_at', 'desc')->paginate($limit);
 
 
@@ -183,7 +186,23 @@ class UserController extends Controller
 
     public function ListOfficial()
     {
-        $users = User::select('id', 'name')->where('id_rol', 3)->get();
+        $users = User::select('id', 'name', 'last_name')
+            ->where('id_rol', 3)
+            ->where('id_profession', 2)
+            ->orderBy('name')->get();
+
+        return response()->json([
+            'res' => true,
+            "data" => $users
+        ], 200);
+    }
+
+    public function ListLawyer()
+    {
+        $users = User::select('id', 'name', 'last_name')
+            ->where('id_rol', 3)
+            ->where('id_profession', 3)
+            ->orderBy('name')->get();
 
         return response()->json([
             'res' => true,
@@ -201,6 +220,52 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function updateAuth(Request $request)
+    {
+        $user = User::find(Auth::user()->id);
+
+        $user->name         = $request["name"];
+        $user->last_name    = $request["last_name"];
+        $user->phone        = $request["phone"];
+        if ($user->update()) {
+            $user->rol = $user->rol;
+            return response()->json([
+                'res' => true,
+                'data' => $user,
+                'message' => 'Datos actualizados con éxito'
+            ], 200);
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'Error al actualizar'
+            ], 400);
+        }
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = User::find(Auth::user()->id);
+
+        if (Hash::check($request->current_password, $user->password)) {
+            $user->password     = Hash::make($request["password"]);
+            if ($user->update()) {
+                return response()->json([
+                    'res' => true,
+                    'message' => 'Contraseña actualizada con éxito'
+                ], 200);
+            } else {
+                return response()->json([
+                    'res' => false,
+                    'message' => 'Error al actualizar contraseña'
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'Contraseña actual incorrecta'
+            ], 400);
+        }
+    }
     public function userAuth()
     {
         return Auth::user();

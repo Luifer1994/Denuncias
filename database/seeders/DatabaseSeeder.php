@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                 "state" => 1
             ]);
         }
-        $professions = ["Admin", "Denunciante", "Funcionario"];
+        $professions = ["Admin", "Ténico", "Abogado"];
         foreach ($professions as $value) {
             DB::table('professions')->insert([
                 "name" => $value,

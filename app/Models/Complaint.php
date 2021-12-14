@@ -20,7 +20,8 @@ class Complaint extends Model
         'id_complaint_type',
         'id_user',
         'id_state',
-        'id_user_asigne'
+        'id_user_asigne',
+        'id_user_inquest'
     ];
 
     public function media()
