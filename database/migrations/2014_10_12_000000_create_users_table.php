@@ -26,6 +26,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->foreignId('id_rol')->constrained('rols');
             $table->integer('id_profession')->nullable();
+            $table->string('token_reset_password')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

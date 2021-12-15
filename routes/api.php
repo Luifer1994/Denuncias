@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 //User
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register-user-informer', [UserController::class, 'registerUserInformer']);
+Route::post('/send-token-reset-password',[UserController::class,'sendTokenResetPassword']);
+Route::post('/reset-password',[UserController::class,'recoveryPassword']);
 //Denuncias
 Route::post('/register-complaint', [ComplaintController::class, 'store']);
 Route::get('/complaints-by-cod/{cod?}', [ComplaintController::class, 'filterByCode']);

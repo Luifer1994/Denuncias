@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ResetPasswordMailable;
+use App\Mail\WellcomeMailable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -54,7 +58,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), $rules);
         //Retorna si falla la validación
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 402);
+            return response()->json($validator->errors(), 400);
         }
 
         $newUser = new User();
@@ -68,6 +72,14 @@ class UserController extends Controller
         $newUser->password          = Hash::make($request["password"]);
         $newUser->id_rol            = 2; //Denunciante
         $newUser->id_profession     = 2; //denunciante
+
+        $msg = [
+            "name" => $newUser->name . " " . $newUser->last_name,
+            "email" => $newUser->email,
+            "password" => $request->password
+        ];
+
+        Mail::to($newUser->email)->send(new WellcomeMailable($msg));
 
         if ($newUser->save()) {
             return response()->json([
@@ -263,6 +275,75 @@ class UserController extends Controller
             return response()->json([
                 'res' => false,
                 'message' => 'Contraseña actual incorrecta'
+            ], 400);
+        }
+    }
+
+    public function sendTokenResetPassword(Request $request)
+    {
+        //Regla de validación
+        $rules = [
+            'email'         =>  'required|email'
+        ];
+        //Validamos
+        $validator = Validator::make($request->all(), $rules);
+        //Retorna si falla la validación
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 402);
+        }
+
+        $user = User::whereEmail($request->email)->first();
+        if ($user) {
+            $user->token_reset_password = Str::random(10);
+            if ($user->update()) {
+                $msg = ["name" => $user->name . " " . $user->last_name, "cod" => $user->token_reset_password];
+                Mail::to($user->email)->send(new ResetPasswordMailable($msg));
+
+                return response()->json([
+                    "res" => true,
+                    "message" => "Se ha enviado un cádigo de recuperación a tu correo"
+                ], 200);
+            }
+        } else {
+            return response()->json([
+                "res" => false,
+                "message" => "EL correo ingresado no está registrado en nuestro sistema"
+            ], 400);
+        }
+    }
+
+    public function recoveryPassword(Request $request)
+    {
+        //Regla de validación
+        $rules = [
+            'cod'         =>  'required',
+            'password'    =>  'required'
+        ];
+        //Validamos
+        $validator = Validator::make($request->all(), $rules);
+        //Retorna si falla la validación
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 402);
+        }
+        $user = User::where('token_reset_password', $request["cod"])->first();
+        if ($user) {
+            $user->password = Hash::make($request["password"]);
+            $user->token_reset_password = null;
+            if ($user->update()) {
+                return response()->json([
+                    "res" => true,
+                    "message" => "Restablecimiento de contraseña éxitoso puedes inicar sesión"
+                ], 200);
+            } else {
+                return response()->json([
+                    "res" => false,
+                    "message" => "Error al restablecer contraseña"
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                "res" => false,
+                "message" => "Código incorrecto"
             ], 400);
         }
     }

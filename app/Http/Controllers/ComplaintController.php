@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ChangeStatusMailable;
+use App\Mail\ConfirmSenComplaintMailable;
+use App\Mail\EmailMailable;
 use App\Models\Complaint;
 use App\Models\ComplaintType;
 use App\Models\Media;
 use App\Models\MediaResponse;
 use App\Models\ResponseComplaint;
+use App\Models\StateComplaint;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class ComplaintController extends Controller
@@ -128,17 +134,13 @@ class ComplaintController extends Controller
         }
 
         $rules = [
-            'latitude' => 'required',
-            'longitude' => 'required',
-            'address' => 'required',
-            'name_offender' => 'required|string',
             'description' => 'required|string',
             'id_complaint_type' => 'required|integer'
         ];
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 402);
+            return response()->json($validator->errors(), 400);
         }
         if (ComplaintType::where('id', $request->id_complaint_type)->where('state', 1)->first()) {
 
@@ -182,6 +184,13 @@ class ComplaintController extends Controller
                         "res" => false,
                         "message" => 'Error al guardar el registro'
                     ], 400);
+                }
+                if (Auth::check()) {
+                    $msg = [
+                        "name" => Auth::user()->name . " " . Auth::user()->last_name,
+                        "cod" => $lasComplaint->cod,
+                    ];
+                    Mail::to(Auth::user()->email)->send(new ConfirmSenComplaintMailable($msg));
                 }
                 return response()->json([
                     "res" => true,
@@ -317,6 +326,9 @@ class ComplaintController extends Controller
         if ($complaint && $complaint->id_state + 1 <= 5) {
             $complaint->id_user_asigne   = $request->user_asigne;
             $complaint->id_state         = $complaint->id_state + 1;
+            $complaint->ComplaintType;
+            $complaint->userAsigne;
+
             if ($complaint->update()) {
                 $newResponse = new ResponseComplaint();
                 $newResponse->description        = $request->description;
@@ -333,6 +345,21 @@ class ComplaintController extends Controller
                         $newMediaResponse->save();
                     }
                 }
+                //return $complaint;
+                $userEmail = User::find($request->user_asigne);
+                //return $userEmail->email;
+                Mail::to($userEmail->email)->send(new EmailMailable($complaint));
+                if ($complaint->id_user) {
+                    $state = StateComplaint::find($complaint->id_state);
+                    $msg = [
+                        "name" => $complaint->user->name . " " . $complaint->user->last_name,
+                        "cod" => $complaint->cod,
+                        "state" => $state->name
+                    ];
+
+                    Mail::to($complaint->user->email)->send(new ChangeStatusMailable($msg));
+                }
+
                 return response()->json([
                     'res' => true,
                     'message' => 'Registro exitoso'
@@ -384,6 +411,8 @@ class ComplaintController extends Controller
         $complaint = Complaint::find($id);
         $complaint->id_user_inquest = $request->lawyer;
         $complaint->id_state        = 3;
+
+
         if ($complaint->update()) {
             $newResponse = new ResponseComplaint();
             $newResponse->description        = $request->description;
@@ -391,6 +420,20 @@ class ComplaintController extends Controller
             $newResponse->id_user            = Auth::user()->id;
             $newResponse->id_state_complaint = $complaint->id_state;
             if ($newResponse->save()) {
+                if ($complaint->id_user) {
+                    $state = StateComplaint::find($complaint->id_state);
+                    $msg = [
+                        "name" => $complaint->user->name . " " . $complaint->user->last_name,
+                        "cod" => $complaint->cod,
+                        "state" => $state->name
+                    ];
+
+                    Mail::to($complaint->user->email)->send(new ChangeStatusMailable($msg));
+                }
+                $userEmail = User::find($complaint->id_user_inquest);
+                $complaint->userAsigne = $userEmail;
+                //return $complaint;
+                Mail::to($userEmail->email)->send(new EmailMailable($complaint));
                 return response()->json([
                     'res' => true,
                     'message' => 'Asignación exitosa'
@@ -422,6 +465,16 @@ class ComplaintController extends Controller
                     $newMediaResponse->type = $value["type"];
                     $newMediaResponse->id_response = $newResponse->id;
                     $newMediaResponse->save();
+                }
+                if ($complaint->id_user) {
+                    $state = StateComplaint::find($complaint->id_state);
+                    $msg = [
+                        "name" => $complaint->user->name . " " . $complaint->user->last_name,
+                        "cod" => $complaint->cod,
+                        "state" => $state->name
+                    ];
+
+                    Mail::to($complaint->user->email)->send(new ChangeStatusMailable($msg));
                 }
                 return response()->json([
                     'res' => true,

@@ -16,9 +16,9 @@ class CreateComplaintsTable extends Migration
         Schema::create('complaints', function (Blueprint $table) {
             $table->id();
             $table->string('cod')->nullable();
-            $table->string('latitude');
-            $table->string('longitude');
-            $table->string('address');
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('address')->nullable();
             $table->string('name_offender')->nullable();
             $table->longText('description');
             $table->foreignId('id_complaint_type')->constrained('complaint_types');

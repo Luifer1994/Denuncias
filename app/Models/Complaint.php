@@ -38,4 +38,14 @@ class Complaint extends Model
     {
         return $this->belongsTo(User::class, 'id_user');
     }
+
+    public function userAsigne()
+    {
+        return $this->belongsTo(User::class, 'id_user_asigne');
+    }
+
+    public function ComplaintType()
+    {
+        return $this->belongsTo(ComplaintType::class, 'id_complaint_type');
+    }
 }
