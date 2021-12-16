@@ -182,7 +182,15 @@ class UserController extends Controller
         $newUser->password          = Hash::make($request->document);
         $newUser->id_rol            = $request->rol;
         $newUser->id_profession     = $request->profession;
-        if ($newUser->save()) {
+        $newUser->number_contract   = $request->number_contract;
+         if ($newUser->save()) {
+            $msg = [
+                "name" => $newUser->name . " " . $newUser->last_name,
+                "email" => $newUser->email,
+                "password" => $request->password
+            ];
+
+            Mail::to($newUser->email)->send(new WellcomeMailable($msg));
             return response()->json([
                 "res" => true,
                 "data" => $newUser,
@@ -201,6 +209,7 @@ class UserController extends Controller
         $users = User::select('id', 'name', 'last_name')
             ->where('id_rol', 3)
             ->where('id_profession', 2)
+            ->orwhere('id_profession', 4)
             ->orderBy('name')->get();
 
         return response()->json([
@@ -301,7 +310,7 @@ class UserController extends Controller
 
                 return response()->json([
                     "res" => true,
-                    "message" => "Se ha enviado un cádigo de recuperación a tu correo"
+                    "message" => "Se ha enviado un código de recuperación a tu correo"
                 ], 200);
             }
         } else {

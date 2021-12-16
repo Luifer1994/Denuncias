@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ChangeStatusMailable;
 use App\Mail\ConfirmSenComplaintMailable;
 use App\Mail\EmailMailable;
+use App\Mail\NewComplaintMailable;
 use App\Models\Complaint;
 use App\Models\ComplaintType;
 use App\Models\Media;
@@ -192,6 +193,15 @@ class ComplaintController extends Controller
                     ];
                     Mail::to(Auth::user()->email)->send(new ConfirmSenComplaintMailable($msg));
                 }
+                $admins = User::where('id_rol', 1)->get();
+                foreach ($admins as $value) {
+                    $msg = [
+                        "name" => $value->name . " " . $value->last_name,
+                        "cod" => $lasComplaint->cod,
+                    ];
+                    Mail::to($value->email)->send(new NewComplaintMailable($msg));
+                }
+               // return $admins;
                 return response()->json([
                     "res" => true,
                     "data" => ["complaint" => $lasComplaint->cod],
@@ -244,14 +254,14 @@ class ComplaintController extends Controller
             //->with('MediaResponse')
             ->first();
 
-        foreach ($complaint->ResponseComplaint as $key => $value) {
-            if ($key > 0) {
-                $value->user =  $value->User;
-                $value->MediaResponse;
-            }
-        }
         //return $complaint->ResponseComplaint;
         if ($complaint) {
+            foreach ($complaint->ResponseComplaint as $key => $value) {
+                if ($key > 0) {
+                    $value->user =  $value->User;
+                    $value->MediaResponse;
+                }
+            }
             return response()->json([
                 'res' => true,
                 'message' => 'ok',
@@ -298,15 +308,13 @@ class ComplaintController extends Controller
             //->with('MediaResponse')
             ->first();
 
-        foreach ($complaint->ResponseComplaint as $key => $value) {
-            if ($key > 0) {
-                $value->user =  $value->User;
-                $value->MediaResponse;
-            }
-        }
-
-
         if ($complaint) {
+            foreach ($complaint->ResponseComplaint as $key => $value) {
+                if ($key > 0) {
+                    $value->user =  $value->User;
+                    $value->MediaResponse;
+                }
+            }
             return response()->json([
                 'res' => true,
                 'message' => 'ok',

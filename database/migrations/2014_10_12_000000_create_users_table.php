@@ -27,6 +27,7 @@ class CreateUsersTable extends Migration
             $table->foreignId('id_rol')->constrained('rols');
             $table->integer('id_profession')->nullable();
             $table->string('token_reset_password')->nullable();
+            $table->string('number_contract',100)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
