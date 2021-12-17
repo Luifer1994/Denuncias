@@ -9,7 +9,7 @@
         </tr> --}}
         <tr>
             <th style="text-align: left; padding-left: 10px;">
-                <h2 style="margin-top: 2px;margin-bottom: 2px;">Hola, {{$msg["name"]}}</h2>
+                <h2 style="margin-top: 2px;margin-bottom: 2px;">Hola, {{ $msg['name'] }}</h2>
             </th>
 
         </tr>
@@ -26,11 +26,15 @@
                 </p>
                 <br>
                 <p style="margin-top: 2px;margin-bottom: 2px;">
-                    Usuario: {{$msg["email"]}}
+                    Usuario: {{ $msg['email'] }}
                     <br>
-                    Contraseña: {{$msg["password"]}}
+                    Contraseña: {{ $msg['password'] }}
                     <br>
-                    Si necesitas ayuda, Escríbenos a denuncias@coralina.gov.co
+                    @if ($msg['isofficial'])
+                        Puedes ingresar a la plataforma en el siguiente link: denuncias.coralina.gov.co
+                        <br>
+                    @endif
+                    Si necesitas ayuda, escríbenos a denuncias@coralina.gov.co
                 </p>
 
             </th>

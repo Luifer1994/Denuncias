@@ -187,7 +187,8 @@ class UserController extends Controller
             $msg = [
                 "name" => $newUser->name . " " . $newUser->last_name,
                 "email" => $newUser->email,
-                "password" => $request->password
+                "password" => $request->document,
+                "isofficial" => 1
             ];
 
             Mail::to($newUser->email)->send(new WellcomeMailable($msg));
@@ -298,12 +299,12 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), $rules);
         //Retorna si falla la validación
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 402);
+            return response()->json($validator->errors(), 400);
         }
 
         $user = User::whereEmail($request->email)->first();
         if ($user) {
-            $user->token_reset_password = Str::random(10);
+            $user->token_reset_password = Str::random(6);
             if ($user->update()) {
                 $msg = ["name" => $user->name . " " . $user->last_name, "cod" => $user->token_reset_password];
                 Mail::to($user->email)->send(new ResetPasswordMailable($msg));
@@ -332,7 +333,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), $rules);
         //Retorna si falla la validación
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 402);
+            return response()->json($validator->errors(), 400);
         }
         $user = User::where('token_reset_password', $request["cod"])->first();
         if ($user) {
