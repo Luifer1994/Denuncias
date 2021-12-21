@@ -17,6 +17,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use App\Exports\ComplaintsExport;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class ComplaintController extends Controller
 {
@@ -94,6 +98,33 @@ class ComplaintController extends Controller
             'message' => 'ok',
             'data' => $complaints,
         ], 200);
+    }
+
+    public function export()
+    {
+        $complaints = Complaint::select(
+            'complaints.cod',
+            'complaints.address',
+            'complaints.latitude',
+            'complaints.longitude',
+            'complaints.description',
+            'complaints.name_offender',
+            DB::raw('DATE_FORMAT(complaints.created_at, "%d-%M-%Y") as date_create'),
+            'complaint_types.name as type_complaint',
+            DB::raw('CONCAT(users.name, " ", users.last_name) AS informer'),
+            DB::raw('CONCAT(user_asigne.name, " ", user_asigne.last_name) AS user_asigne'),
+            DB::raw('CONCAT(user_inquest.name, " ", user_inquest.last_name) AS user_inquest'),
+            'state_complaints.name as state'
+        )
+            ->join('complaint_types', 'complaints.id_complaint_type', 'complaint_types.id')
+            ->leftjoin('users', 'complaints.id_user', 'users.id')
+            ->leftjoin('users as user_asigne', 'complaints.id_user_asigne', 'user_asigne.id')
+            ->leftjoin('users as user_inquest', 'complaints.id_user_inquest', 'user_inquest.id')
+            ->join('state_complaints', 'complaints.id_state', 'state_complaints.id')
+            ->get();
+
+
+        return $complaints;
     }
 
     public function listByUser(Request $request)
@@ -201,7 +232,7 @@ class ComplaintController extends Controller
                     ];
                     Mail::to($value->email)->send(new NewComplaintMailable($msg));
                 }
-               // return $admins;
+                // return $admins;
                 return response()->json([
                     "res" => true,
                     "data" => ["complaint" => $lasComplaint->cod],

@@ -13,12 +13,13 @@ use Illuminate\Support\Facades\Route;
 //User
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register-user-informer', [UserController::class, 'registerUserInformer']);
-Route::post('/send-token-reset-password',[UserController::class,'sendTokenResetPassword']);
-Route::post('/reset-password',[UserController::class,'recoveryPassword']);
+Route::post('/send-token-reset-password', [UserController::class, 'sendTokenResetPassword']);
+Route::post('/reset-password', [UserController::class, 'recoveryPassword']);
 //Denuncias
 Route::post('/register-complaint', [ComplaintController::class, 'store']);
 Route::get('/complaints-by-cod/{cod?}', [ComplaintController::class, 'filterByCode']);
 Route::apiResource('/complaint-types', TypeComplaintController::class);
+Route::get('/complaints-export', [ComplaintController::class, 'export']);
 //Respuestas
 Route::get('/media-by-response/{id}', [ResponseController::class, 'getMedia']); //Media por respuesta
 //Tipos documentos
@@ -38,8 +39,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     //Usuarios
     Route::post('/register-user-professional', [UserController::class, 'registerUserProfessional']);
     Route::get('/logout', [UserController::class, 'logout']);
-    Route::put('/update-auth',[UserController::class, 'updateAuth']);
-    Route::put('/update-password',[UserController::class, 'changePassword']);
+    Route::put('/update-auth', [UserController::class, 'updateAuth']);
+    Route::put('/update-password', [UserController::class, 'changePassword']);
+    Route::put('/update-official/{id}', [UserController::class, 'UpdateOfficial']);
     //Denuncias
     Route::get('/complaints-list{search?}{state?}{limit?}{page?}', [ComplaintController::class, 'index']);
     Route::apiResource('/complaints', ComplaintController::class);

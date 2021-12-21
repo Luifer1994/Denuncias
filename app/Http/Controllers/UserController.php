@@ -76,7 +76,8 @@ class UserController extends Controller
         $msg = [
             "name" => $newUser->name . " " . $newUser->last_name,
             "email" => $newUser->email,
-            "password" => $request->password
+            "password" => $request->password,
+            "isofficial" => 0
         ];
 
         Mail::to($newUser->email)->send(new WellcomeMailable($msg));
@@ -183,7 +184,7 @@ class UserController extends Controller
         $newUser->id_rol            = $request->rol;
         $newUser->id_profession     = $request->profession;
         $newUser->number_contract   = $request->number_contract;
-         if ($newUser->save()) {
+        if ($newUser->save()) {
             $msg = [
                 "name" => $newUser->name . " " . $newUser->last_name,
                 "email" => $newUser->email,
@@ -201,6 +202,63 @@ class UserController extends Controller
             return response()->json([
                 "res" => false,
                 'message' => 'Error al guardar el registro',
+            ], 400);
+        }
+    }
+
+    public function UpdateOfficial(Request $request, $id)
+    {
+        if (Auth::user()->rol->id !== 1) {
+            return response()->json([
+                "res" => false,
+                'message' => 'No tienes permisos',
+            ], 401);
+        }
+        $User = User::find($id);
+
+        if ($User) {
+            //Regla de validación
+            $rules = [
+                'type_people'   => 'required|integer',
+                'type_document' => 'required|integer',
+                'document'      => 'required|integer',
+                'rol'           => 'required|integer',
+                'name'          => 'required|string',
+                'last_name'     => 'required|string',
+                'email'         => 'required|email|unique:users,email,' . $User->id . ',id',
+                'phone'         => 'required'
+            ];
+            //Validamos
+            $validator = Validator::make($request->all(), $rules);
+            //Retorna si falla la validación
+            if ($validator->fails()) {
+                return response()->json($validator->errors(), 400);
+            }
+            $User->id_type_people  = $request->type_people;
+            $User->id_type_document  = $request->type_document;
+            $User->document          = $request->document;
+            $User->name              = $request->name;
+            $User->last_name         = $request->last_name;
+            $User->email             = $request->email;
+            $User->phone             = $request->phone;
+            $User->id_rol            = $request->rol;
+            $User->id_profession     = $request->profession;
+            $User->number_contract   = $request->number_contract;
+            if ($User->update()) {
+                return response()->json([
+                    "res" => true,
+                    'message' => 'Actualización exitosa',
+                ], 200);
+            } else {
+                return response()->json([
+                    "res" => false,
+                    'message' => 'Error al actualizar el registro',
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                "res" => false,
+                'message' => 'EL registro no existe',
             ], 400);
         }
     }
