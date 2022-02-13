@@ -46,6 +46,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('/complaints-list{search?}{state?}{limit?}{page?}', [ComplaintController::class, 'index']);
     Route::apiResource('/complaints', ComplaintController::class);
     Route::put('/asigne-lawyer/{id}', [ComplaintController::class, 'asigneLawyer']);
+    Route::put('/asigne-notify/{id}', [ComplaintController::class, 'asigneNotify']);
     Route::put('/complaint-closed/{id}', [ComplaintController::class, 'closed']);
     Route::get('/complaints-list-by-user/{search?}{limit?}{page?}', [ComplaintController::class, 'listByUser']);
     //Usuarios

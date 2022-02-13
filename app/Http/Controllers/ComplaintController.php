@@ -486,11 +486,53 @@ class ComplaintController extends Controller
         }
     }
 
+    public function asigneNotify(Request $request, $id)
+    {
+
+        $complaint = Complaint::find($id);
+        $complaint->id_user_inquest = $request->user_asigne;
+        $complaint->id_state        = 4;
+
+
+        if ($complaint->update()) {
+            $newResponse = new ResponseComplaint();
+            $newResponse->description        = $request->description;
+            $newResponse->id_complaint       = $complaint->id;
+            $newResponse->id_user            = Auth::user()->id;
+            $newResponse->id_state_complaint = $complaint->id_state;
+            if ($newResponse->save()) {
+                if ($complaint->id_user) {
+                    $state = StateComplaint::find($complaint->id_state);
+                    $msg = [
+                        "name" => $complaint->user->name . " " . $complaint->user->last_name,
+                        "cod" => $complaint->cod,
+                        "state" => $state->name
+                    ];
+
+                    Mail::to($complaint->user->email)->send(new ChangeStatusMailable($msg));
+                }
+                $userEmail = User::find($complaint->id_user_inquest);
+                $complaint->userAsigne = $userEmail;
+                //return $complaint;
+                Mail::to($userEmail->email)->send(new EmailMailable($complaint));
+                return response()->json([
+                    'res' => true,
+                    'message' => 'Asignación exitosa'
+                ], 200);
+            }
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'Error al asignar el abogado'
+            ], 400);
+        }
+    }
+
 
     public function closed(Request $request, $id)
     {
         $complaint = Complaint::find($id);
-        $complaint->id_state        = 5;
+        $complaint->id_state        = 6;
         if ($complaint->update()) {
             $newResponse = new ResponseComplaint();
             $newResponse->description        = $request->description;

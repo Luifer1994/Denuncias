@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
                 "state" => 1
             ]);
         }
-        $professions = ["Admin", "Ténico", "Abogado","Secretaria"];
+        $professions = ["Admin", "Ténico", "Abogado", "Secretaria"];
         foreach ($professions as $value) {
             DB::table('professions')->insert([
                 "name" => $value,
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $complaintState = ["INICIADA", "EN PROCESO","INDAGACIÓN", "RETRASADA", "FINALIZADA"];
+        $complaintState = ["INICIADA", "EN PROCESO", "INDAGACIÓN", "NOTIFICACIÓN", "RETRASADA", "FINALIZADA"];
         foreach ($complaintState as $value) {
             DB::table('state_complaints')->insert([
                 "name" => $value,
