@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use App\Exports\ComplaintsExport;
+use App\Mail\NotifyStateAdmin;
+use App\Mail\NotifyStateFunt;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -362,7 +365,7 @@ class ComplaintController extends Controller
     public function update(Request $request, $id)
     {
         $complaint = Complaint::find($id);
-        if ($complaint && $complaint->id_state + 1 <= 5) {
+        if ($complaint && $complaint->id_state + 1 <= 6) {
             $complaint->id_user_asigne   = $request->user_asigne;
             $complaint->id_state         = $complaint->id_state + 1;
             $complaint->ComplaintType;
@@ -573,5 +576,57 @@ class ComplaintController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function notifyStateAdmin()
+    {
+
+        $complaints = Complaint::where('id_user_asigne', null)->get();
+        foreach ($complaints as $complaint) {
+            $userAdmin = User::where('id_rol', 1)->get();
+
+            if (Carbon::parse($complaint->created_at) >= Carbon::now()->addHour(12)) {
+                $state = StateComplaint::find($complaint->id_state);
+                foreach ($userAdmin as $user) {
+                    $msg = [
+                        "name" => $user->name . " " . $user->last_name,
+                        "cod" => $complaint->cod,
+                        "state" => $state->name
+                    ];
+
+                    Mail::to($user->email)->send(new NotifyStateAdmin($msg));
+                }
+            }
+        }
+    }
+
+    public function notifyStateFunt()
+    {
+
+        $complaints = Complaint::withCount('ResponseComplaint')->get();
+
+        foreach ($complaints as $complaint) {
+
+            if ($complaint->id_user_asigne && $complaint->response_complaint_count <= 2) {
+
+                foreach ($complaint->ResponseComplaint as $value) {
+
+                    /*  echo Carbon::parse($value->created_at) . "<br/>"; */
+                    /*  echo Carbon::now()->addHour(24) . "<br/>"; */
+
+                    if (Carbon::parse($value->created_at) <= Carbon::now()->addHour(24) && $value->id_state_complaint > 1) {
+                        //return $value;
+                        $user = User::find($complaint->id_user_asigne);
+                        $state = StateComplaint::find($complaint->id_state);
+                        $msg = [
+                            "name" => $user->name . " " . $user->last_name,
+                            "cod" => $complaint->cod,
+                            "state" => $state->name
+                        ];
+                        Mail::to($user->email)->send(new NotifyStateFunt($msg));
+                    }
+                }
+            }
+        }
     }
 }

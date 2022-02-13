@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('/update-auth', [UserController::class, 'updateAuth']);
     Route::put('/update-password', [UserController::class, 'changePassword']);
     Route::put('/update-official/{id}', [UserController::class, 'UpdateOfficial']);
+    Route::get('/validate-sesion', [UserController::class, 'validateSesion']);
     //Denuncias
     Route::get('/complaints-list{search?}{state?}{limit?}{page?}', [ComplaintController::class, 'index']);
     Route::apiResource('/complaints', ComplaintController::class);

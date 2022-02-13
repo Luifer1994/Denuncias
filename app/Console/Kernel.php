@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Console\Commands\NotifyStateComplaint;
+use App\Console\Commands\NotifyStateComplaintFunt;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,9 +15,19 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
+    protected $commands = [
+        NotifyStateComplaint::class,
+        NotifyStateComplaintFunt::class,
+    ];
+    protected function scheduleTimezone()
+    {
+        return 'America/Bogota';
+    }
+
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('command:notifystatecomplainty')->everyMinute();
+        $schedule->command('command:notifystatecomplaintyfunt')->everyMinute();
     }
 
     /**
@@ -23,10 +35,10 @@ class Kernel extends ConsoleKernel
      *
      * @return void
      */
-    protected function commands()
+    /* protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
-    }
+    } */
 }

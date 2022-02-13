@@ -419,4 +419,11 @@ class UserController extends Controller
     {
         return Auth::user();
     }
+
+    public function validateSesion()
+    {
+        if (Auth::check()) {
+            return true;
+        }
+    }
 }

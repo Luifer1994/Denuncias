@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ComplaintController;
 use App\Mail\EmailMailable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -19,3 +20,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/notify-state-admin', [ComplaintController::class, 'notifyStateAdmin']);
+Route::get('/notify-state-funt', [ComplaintController::class, 'notifyStateFunt']);
