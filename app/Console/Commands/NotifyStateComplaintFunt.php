@@ -18,7 +18,7 @@ class NotifyStateComplaintFunt extends Command
      *
      * @var string
      */
-    protected $signature = 'registered:notifystatecomplaintyfunt';
+    protected $signature = 'command:notifystatecomplaintyfunt';
 
     /**
      * The console command description.

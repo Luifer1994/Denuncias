@@ -20,5 +20,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/notify-state-admin', [ComplaintController::class, 'notifyStateAdmin']);
-Route::get('/notify-state-funt', [ComplaintController::class, 'notifyStateFunt']);
+/* Route::get('/notify-state-admin', [ComplaintController::class, 'notifyStateAdmin']);
+Route::get('/notify-state-funt', [ComplaintController::class, 'notifyStateFunt']); */
