@@ -573,6 +573,30 @@ class ComplaintController extends Controller
         }
     }
 
+    public function cancel(Request $request, $id)
+    {
+        $complaint = Complaint::find($id);
+        $complaint->id_state        = 7;
+        if ($complaint->update()) {
+            $newResponse = new ResponseComplaint();
+            $newResponse->description        = $request->description;
+            $newResponse->id_complaint       = $complaint->id;
+            $newResponse->id_user            = Auth::user()->id;
+            $newResponse->id_state_complaint = $complaint->id_state;
+            if ($newResponse->save()) {
+                return response()->json([
+                    'res' => true,
+                    'message' => 'Denuncia cancelada con éxito'
+                ], 200);
+            }
+        } else {
+            return response()->json([
+                'res' => false,
+                'message' => 'Error al cerrar la denuncia'
+            ], 400);
+        }
+    }
+
     public function destroy($id)
     {
         //
