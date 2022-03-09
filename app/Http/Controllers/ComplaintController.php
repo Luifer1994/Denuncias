@@ -367,7 +367,7 @@ class ComplaintController extends Controller
         $complaint = Complaint::find($id);
         if ($complaint && $complaint->id_state + 1 <= 6) {
             $complaint->id_user_asigne   = $request->user_asigne;
-            $complaint->id_state         = $complaint->id_state + 1;
+            $complaint->id_state         = 2;
             $complaint->ComplaintType;
             $complaint->userAsigne;
 
