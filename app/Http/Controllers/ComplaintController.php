@@ -50,6 +50,7 @@ class ComplaintController extends Controller
                 ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
                 ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
                 ->where('id_user_asigne', $id_user)
+               // ->where('complaints.city_id', Auth::user()->city_id)
                 ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
                 ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
                 ->OrderBy('id', 'desc')->paginate($limit);
@@ -70,10 +71,33 @@ class ComplaintController extends Controller
                 ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
                 ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
                 ->where('id_user_inquest', $id_user)
+               // ->where('complaints.city_id', Auth::user()->city_id)
                 ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
                 ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
                 ->OrderBy('id', 'desc')->paginate($limit);
-        } else {
+        }elseif (Auth::user()->id_rol !== 1 && Auth::user()->id_profession == 4) {
+            $complaints = Complaint::select(
+                'complaints.id',
+                'complaints.cod',
+                'complaint_types.name as type_complaint',
+                'users.name as informer',
+                'state_complaints.name as state',
+                'complaints.latitude',
+                'complaints.longitude',
+                'complaints.name_offender',
+                'complaints.description',
+                'complaints.created_at'
+            )
+                ->leftjoin('users', 'complaints.id_user', '=', 'users.id')
+                ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
+                ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
+                ->where('id_user_inquest', $id_user)
+               // ->where('complaints.city_id', Auth::user()->city_id)
+                ->where('complaints.cod', 'like', '%' . $request["search"] . '%')
+                ->where('complaints.id_state', 'like', '%' . $request["state"] . '%')
+                ->OrderBy('id', 'desc')->paginate($limit);
+        }
+         else {
             $complaints = Complaint::select(
                 'complaints.id',
                 'complaints.cod',
@@ -150,6 +174,7 @@ class ComplaintController extends Controller
             ->join('complaint_types', 'complaints.id_complaint_type', '=', 'complaint_types.id')
             ->join('state_complaints', 'complaints.id_state', '=', 'state_complaints.id')
             ->where('complaints.id_user', Auth::user()->id)
+            ->where('complaints.city_id', Auth::user()->city_id)
             ->orWhere('complaints.cod', 'like', '%' . $request["search"] . '%')
             ->OrderBy('id', 'desc')->paginate($limit);
 
@@ -188,6 +213,7 @@ class ComplaintController extends Controller
             $newComplaint->id_complaint_type    = $request->id_complaint_type;
             $newComplaint->id_user              = $user;
             $newComplaint->id_state             = 1;
+            $newComplaint->city_id              = 1; //Por ahora
 
             if ($newComplaint->save()) {
                 $lasComplaint = Complaint::latest('id')->first();
