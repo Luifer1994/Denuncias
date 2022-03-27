@@ -28,6 +28,7 @@ class CreateUsersTable extends Migration
             $table->integer('id_profession')->nullable();
             $table->string('token_reset_password')->nullable();
             $table->string('number_contract',100)->nullable();
+            $table->tinyInteger('city_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

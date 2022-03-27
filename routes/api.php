@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ProfessionController;
 use App\Http\Controllers\ResponseController;
@@ -30,6 +31,8 @@ Route::get('list-type-peoples', [TypePeopleController::class, 'index']);
 Route::get('/rols-active', [RolController::class, 'index']);
 //Porfesiones
 Route::get('/professions-active', [ProfessionController::class, 'index']);
+//Ciudades
+Route::get('/cities-list', [CityController::class, 'index']);
 
 
 

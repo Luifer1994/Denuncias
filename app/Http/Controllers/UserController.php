@@ -132,9 +132,10 @@ class UserController extends Controller
         //return $request;
         $request["limit"] ? $limit = $request["limit"] : $limit = 10;
 
-        $users = User::select('users.*', 'rols.name as rol', 'professions.name as profession')
+        $users = User::select('users.*', 'rols.name as rol', 'professions.name as profession','cities.name as city')
             ->leftjoin('rols', 'users.id_rol', 'rols.id')
             ->leftjoin('professions', 'users.id_profession', 'professions.id')
+            ->leftjoin('cities','users.city_id', 'cities.id')
             ->where('users.id_rol', '<>', 2)
             ->where('users.document', 'like', '%' . $request["search"] . '%')
             ->withCount('complaint')->orderBy('created_at', 'desc')->paginate($limit);
@@ -164,7 +165,8 @@ class UserController extends Controller
             'name'          => 'required|string',
             'last_name'     => 'required|string',
             'email'         => 'required|email|unique:users,email',
-            'phone'         => 'required'
+            'phone'         => 'required',
+            'city_id'       => 'required|exists:cities,id'
         ];
         //Validamos
         $validator = Validator::make($request->all(), $rules);
@@ -184,6 +186,7 @@ class UserController extends Controller
         $newUser->id_rol            = $request->rol;
         $newUser->id_profession     = $request->profession;
         $newUser->number_contract   = $request->number_contract;
+        $newUser->city_id           = $request->city_id;
         if ($newUser->save()) {
             $msg = [
                 "name" => $newUser->name . " " . $newUser->last_name,
@@ -226,7 +229,8 @@ class UserController extends Controller
                 'name'          => 'required|string',
                 'last_name'     => 'required|string',
                 'email'         => 'required|email|unique:users,email,' . $User->id . ',id',
-                'phone'         => 'required'
+                'phone'         => 'required',
+                'city_id'       => 'required|exists:cities,id'
             ];
             //Validamos
             $validator = Validator::make($request->all(), $rules);
@@ -244,6 +248,7 @@ class UserController extends Controller
             $User->id_rol            = $request->rol;
             $User->id_profession     = $request->profession;
             $User->number_contract   = $request->number_contract;
+            $User->city_id           = $request->city_id;
             if ($User->update()) {
                 return response()->json([
                     "res" => true,

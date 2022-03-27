@@ -20,6 +20,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        $cities = ["San Andrés", "Providencia"];
+        foreach ($cities as $city) {
+            DB::table('cities')->insert([
+                "name" => $city
+            ]);
+        }
 
         $roles = ["Admin", "Denunciante", "Funcionario"];
         foreach ($roles as $rol) {
